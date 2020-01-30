@@ -36,8 +36,8 @@ def exit_with_error(func_name, line_number):
 def enqueue(queue, value):
     if queue["remaining_cap"] < 1:
         return False
-    queue["memory"][queue["end"]] = value
-    queue["end"] = (queue["end"] + 1) % CAPACITY
+    queue["memory"][queue["index"]] = value
+    queue["index"] = (queue["index"] + 1) % CAPACITY
     queue["remaining_cap"] -= 1
     return True
 
@@ -45,23 +45,22 @@ def enqueue(queue, value):
 def dequeue(queue):
     if CAPACITY <= queue["remaining_cap"]:
         return None
-    index = queue["start"]
+    index = (queue["index"] + queue["remaining_cap"]) % CAPACITY
     value = queue["memory"][index]
     queue["memory"][index] = None
-    queue["start"] = (queue["start"] + 1) % CAPACITY
     queue["remaining_cap"] += 1
     return value
 
 
 def do_enqueue(queue, n):
-    print("\n{}enqueue{}(..., {}{}{}) @ {}end: {}{}\n".format(
+    print("\n\n{}enqueue{}(..., {}{}{}) @ {}end: {}{}\n".format(
         BOLD,
         CLOSE,
         BOLD_BLUE,
         n,
         CLOSE,
         BOLD_UNDERLINE,
-        queue["end"],
+        queue["index"],
         CLOSE,
     ))
     for _ in range(n):
@@ -78,14 +77,14 @@ def do_enqueue(queue, n):
 
 
 def do_dequeue(queue, n):
-    print("\n{}dequeue{}(..., {}{}{}) @ {}start: {}{}\n".format(
+    print("\n\n{}dequeue{}(..., {}{}{}) @ {}start: {}{}\n".format(
         BOLD,
         CLOSE,
         BOLD_CYAN,
         n,
         CLOSE,
         BOLD_UNDERLINE,
-        queue["start"],
+        (queue["index"] + queue["remaining_cap"]) % CAPACITY,
         CLOSE,
     ))
     for _ in range(n):
@@ -103,8 +102,7 @@ def do_dequeue(queue, n):
 def main():
     queue = {
         "memory": [None] * CAPACITY,
-        "start": 0,
-        "end": 0,
+        "index": 0,
         "remaining_cap": CAPACITY,
     }
     do_enqueue(queue, 8)
